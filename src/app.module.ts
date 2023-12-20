@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { ProductModule } from './product/product.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { getMongoConfig } from './configs/mongo.config';
+import { ExerciseModule } from './exercise/exercise.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { getMongoConfig } from './configs/mongo.config';
       useFactory: getMongoConfig,
     }),
     ProductModule,
+    ExerciseModule,
   ],
   controllers: [AppController],
   providers: [AppService],
