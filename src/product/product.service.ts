@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Category } from './schemas/category.schema';
+
 import * as mongoose from 'mongoose';
-import { Product } from './schemas/product.schema';
+import { Category, Product } from './schemas';
 
 @Injectable()
 export class ProductService {
