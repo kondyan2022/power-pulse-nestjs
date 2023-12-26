@@ -4,6 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { Category, Product } from './schemas';
 import { ProductSearchDto } from './dto';
+import { IOptions, IProductSearch } from './types';
 
 @Injectable()
 export class ProductService {
@@ -22,7 +23,9 @@ export class ProductService {
     return this.productModel.find().exec();
   }
 
-  async getProductsSearch(productSearchDto: ProductSearchDto): Promise<any> {
+  async getProductsSearch(
+    productSearchDto: ProductSearchDto,
+  ): Promise<IProductSearch> {
     const {
       q = '',
       category,
@@ -30,7 +33,7 @@ export class ProductService {
       limit = 20,
       recommend,
     } = productSearchDto;
-    const options: any = {
+    const options: IOptions = {
       title: { $regex: q, $options: 'i' },
     };
     if (category) {

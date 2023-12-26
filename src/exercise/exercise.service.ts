@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { Exercise, ExerciseGroup } from './schemas';
+import { ExerciseSearchDto } from './dto';
+import { IExerciseSearch, IFilter } from './types';
 
 @Injectable()
 export class ExerciseService {
@@ -20,7 +22,9 @@ export class ExerciseService {
     return this.exercise.find().exec();
   }
 
-  async getExercisesSearch(exerciseSearchDto: any): Promise<any> {
+  async getExercisesSearch(
+    exerciseSearchDto: ExerciseSearchDto,
+  ): Promise<IExerciseSearch> {
     const {
       filter,
       value = '',
@@ -29,7 +33,7 @@ export class ExerciseService {
       page = 0,
     } = exerciseSearchDto;
 
-    const options: any = {};
+    const options: IFilter = {};
 
     if (filter) {
       options[filter] = value;

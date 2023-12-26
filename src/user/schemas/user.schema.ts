@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, SchemaTimestampsConfig } from 'mongoose';
 
 @Schema({
   _id: false,
@@ -65,7 +65,7 @@ class Profile {
   DSN: number;
 }
 
-export type UserDocument = HydratedDocument<User>;
+export type UserDocument = HydratedDocument<User> & SchemaTimestampsConfig;
 
 @Schema({ versionKey: false, timestamps: true })
 export class User {
@@ -88,6 +88,9 @@ export class User {
 
   @Prop()
   avatarURL: string;
+
+  @Prop()
+  token: string;
 
   @Prop({ default: false })
   googleRedirected: boolean;

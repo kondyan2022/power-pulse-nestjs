@@ -6,6 +6,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ExerciseService } from './exercise.service';
+import { ExerciseSearchDto } from './dto';
 
 @Controller('exercises')
 export class ExerciseController {
@@ -23,7 +24,7 @@ export class ExerciseController {
       transformOptions: { enableImplicitConversion: true },
     }),
   )
-  getExercisesSearch(@Query() exercisesSearchDto: any) {
+  getExercisesSearch(@Query() exercisesSearchDto: ExerciseSearchDto) {
     return this.exerciseService.getExercisesSearch(exercisesSearchDto);
   }
 }
