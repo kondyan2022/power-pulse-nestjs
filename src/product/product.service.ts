@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 
 import * as mongoose from 'mongoose';
 import { Category, Product } from './schemas';
+import { ProductSearchDto } from './dto';
 
 @Injectable()
 export class ProductService {
@@ -19,5 +20,47 @@ export class ProductService {
 
   async getProducts(): Promise<Product[]> {
     return this.productModel.find().exec();
+  }
+
+  async getProductsSearch(productSearchDto: ProductSearchDto): Promise<any> {
+    const {
+      q = '',
+      category,
+      page = 0,
+      limit = 20,
+      recommend,
+    } = productSearchDto;
+    const options: any = {
+      title: { $regex: q, $options: 'i' },
+    };
+    if (category) {
+      options.category = category;
+    }
+
+    // if (recommend !== undefined) {
+    //   const {
+    //     profile: { blood },
+    //   } = req.user;
+    //   options['groupBloodNotAllowed.' + blood] = !recommend;
+    // }
+
+    const product = await this.productModel
+      .find(options)
+      .limit(limit)
+      .skip(limit * page)
+      .sort({ title: 1 });
+    const { length: totalCount } = await this.productModel.find(options);
+    const totalPage = Math.ceil(totalCount / limit);
+
+    return {
+      searchkey: q,
+      category: category ? category : 'All',
+      recommend: recommend !== undefined ? String(recommend) : 'All',
+      page,
+      limit,
+      totalPage,
+      totalCount,
+      results: product,
+    };
   }
 }

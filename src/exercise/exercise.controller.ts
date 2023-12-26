@@ -1,7 +1,13 @@
-import { Controller, Get } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { ExerciseService } from './exercise.service';
 
-@Controller('exercise')
+@Controller('exercises')
 export class ExerciseController {
   constructor(private readonly exerciseService: ExerciseService) {}
 
@@ -10,8 +16,14 @@ export class ExerciseController {
     return this.exerciseService.getExerciseGroups();
   }
 
-  @Get()
-  getExercise() {
-    return this.exerciseService.getExercise();
+  @Get('search')
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+    }),
+  )
+  getExercisesSearch(@Query() exercisesSearchDto: any) {
+    return this.exerciseService.getExercisesSearch(exercisesSearchDto);
   }
 }

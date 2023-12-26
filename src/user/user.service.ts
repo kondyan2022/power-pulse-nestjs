@@ -5,5 +5,8 @@ import * as mongoose from 'mongoose';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private user: mongoose.Model<User>) {}
+  constructor(
+    @InjectModel(User.name)
+    private user: mongoose.Model<User>,
+  ) {}
 }
