@@ -1,1 +1,2 @@
-export * from './pagination.type';
+export * from './pagination.interface';
+export * from './expressRequest.interface';

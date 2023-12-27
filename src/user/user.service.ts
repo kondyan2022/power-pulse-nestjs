@@ -52,6 +52,11 @@ export class UserService {
       },
     };
   }
+
+  findById(id: string): Promise<User> {
+    return this.user.findById(id);
+  }
+
   async login(userRegisterDto: UserLoginDto): Promise<any> {
     const { email, password } = userRegisterDto;
     let user = await this.user.findOne({ email });
@@ -89,5 +94,24 @@ export class UserService {
       token,
       user,
     };
+  }
+
+  getCurrent(currentUser: UserDocument) {
+    const { _id, name, email, avatarURL, profile, createdAt } = currentUser;
+    return { _id, name, email, avatarURL, profile, createdAt };
+  }
+
+  async logout(currentUser: UserDocument): Promise<void> {
+    const { _id } = currentUser;
+    await this.user.findByIdAndUpdate(_id, { token: '' });
+  }
+
+  async updateProfile(user, body) {
+    const { _id } = user;
+    return await this.user.findByIdAndUpdate(_id, body, {
+      new: true,
+      select:
+        '-updatedAt -password -token -verify -verificationToken -googleRedirected',
+    });
   }
 }
