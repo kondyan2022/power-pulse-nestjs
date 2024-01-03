@@ -2,36 +2,46 @@ import {
   Controller,
   Get,
   Query,
+  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { ProductSearchDto } from './dto';
-import { ApiTags } from '@nestjs/swagger';
-// import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { AuthGuard, HasProfileGuard } from 'src/user/guards';
+import { CurrentUser } from 'src/user/decorator';
+import { UserDocument } from 'src/user/schemas';
+import { IProductSearch } from './types';
 
-// @ApiBearerAuth()
+@ApiBearerAuth('token')
 @ApiTags('products')
 @Controller('products')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
   @Get()
+  @UseGuards(AuthGuard)
+  @UseGuards(HasProfileGuard)
   getProducts() {
     return this.productService.getProducts();
   }
   @Get('categories')
+  @UseGuards(AuthGuard)
   getCategories() {
     return this.productService.getCategories();
   }
   @Get('search')
+  @UseGuards(AuthGuard)
+  @UseGuards(HasProfileGuard)
   @UsePipes(
     new ValidationPipe({
       transform: true,
-      transformOptions: { enableImplicitConversion: true },
     }),
   )
-  getProductsSearch(@Query() productSearchDto: ProductSearchDto) {
-    console.log(productSearchDto);
-    return this.productService.getProductsSearch(productSearchDto);
+  getProductsSearch(
+    @CurrentUser() user: UserDocument,
+    @Query() productSearchDto: ProductSearchDto,
+  ): Promise<IProductSearch> {
+    return this.productService.getProductsSearch(user, productSearchDto);
   }
 }

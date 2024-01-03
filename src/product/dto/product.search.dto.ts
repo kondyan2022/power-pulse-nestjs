@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { IsBoolean, IsInt, IsOptional, IsString, Min } from 'class-validator';
 
 export class ProductSearchDto {
@@ -24,6 +25,7 @@ export class ProductSearchDto {
   })
   @IsOptional()
   @IsInt()
+  @Transform(({ value }) => Number(value))
   @Min(1)
   limit: number;
 
@@ -35,11 +37,17 @@ export class ProductSearchDto {
   })
   @IsOptional()
   @IsInt()
+  @Transform(({ value }) => Number(value))
   @Min(0)
   page: number;
 
   @ApiProperty({ required: false, description: 'Product recommended' })
   @IsOptional()
   @IsBoolean()
+  @Transform(({ value }) => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return value;
+  })
   recommend: boolean;
 }

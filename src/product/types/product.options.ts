@@ -1,3 +1,7 @@
+import { groupBloodNotAllowedSchema } from '../schemas';
+
 export interface IOptions {
-  [key: string]: string | { [key: string]: string };
+  title?: { [key: string]: string };
+  category?: string;
+  groupBloodNotAllowed?: Partial<groupBloodNotAllowedSchema>;
 }

@@ -4,6 +4,7 @@ import { ProductService } from './product.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Category, CategorySchema } from './schemas/category.schema';
 import { Product, ProductSchema } from './schemas/product.schema';
+import { HasProfileGuard } from 'src/user/guards';
 
 @Module({
   imports: [
@@ -13,6 +14,6 @@ import { Product, ProductSchema } from './schemas/product.schema';
     ]),
   ],
   controllers: [ProductController],
-  providers: [ProductService],
+  providers: [ProductService, HasProfileGuard],
 })
 export class ProductModule {}

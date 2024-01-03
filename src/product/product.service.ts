@@ -5,6 +5,7 @@ import * as mongoose from 'mongoose';
 import { Category, Product } from './schemas';
 import { ProductSearchDto } from './dto';
 import { IOptions, IProductSearch } from './types';
+import { UserDocument } from 'src/user/schemas';
 
 @Injectable()
 export class ProductService {
@@ -24,6 +25,7 @@ export class ProductService {
   }
 
   async getProductsSearch(
+    user: UserDocument,
     productSearchDto: ProductSearchDto,
   ): Promise<IProductSearch> {
     const {
@@ -40,13 +42,13 @@ export class ProductService {
       options.category = category;
     }
 
-    // if (recommend !== undefined) {
-    //   const {
-    //     profile: { blood },
-    //   } = req.user;
-    //   options['groupBloodNotAllowed.' + blood] = !recommend;
-    // }
-
+    if (recommend !== undefined) {
+      const {
+        profile: { blood },
+      } = user;
+      options['groupBloodNotAllowed.' + blood.toString()] = !recommend;
+    }
+    console.log(options);
     const product = await this.productModel
       .find(options)
       .limit(limit)

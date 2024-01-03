@@ -4,7 +4,7 @@ import { HydratedDocument } from 'mongoose';
 export type ProductDocument = HydratedDocument<Product>;
 
 @Schema({ _id: false })
-class groupBloodNotAllowedSchema {
+export class groupBloodNotAllowedSchema {
   @Prop({ default: false })
   1: boolean;
   @Prop({ default: false })
