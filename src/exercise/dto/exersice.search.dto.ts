@@ -4,7 +4,7 @@ import { IsInt, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
 export class ExerciseSearchDto {
   @ApiProperty({
     required: false,
-    enum: ['Body part', 'Equipment', 'Muscles'],
+    enum: ['bodyPart', 'equipment', 'muscles'],
     description: 'Filter filed name for exercise group.',
   })
   @IsOptional()
