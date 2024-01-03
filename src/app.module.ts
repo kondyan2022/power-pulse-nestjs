@@ -9,6 +9,7 @@ import { getMongoConfig } from './configs/mongo.config';
 import { ExerciseModule } from './exercise/exercise.module';
 import { UserModule } from './user/user.module';
 import { AuthMiddleware } from './user/middlewares';
+import { DiaryModule } from './diary/diary.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { AuthMiddleware } from './user/middlewares';
     ProductModule,
     ExerciseModule,
     UserModule,
+    DiaryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -16,6 +16,7 @@ async function bootstrap() {
     .addTag('users')
     .addTag('products')
     .addTag('exercises')
+    .addTag('diary')
     .addBearerAuth(
       { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
       'token',

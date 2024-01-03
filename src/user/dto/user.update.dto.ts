@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsDate,
   IsIn,
@@ -59,6 +60,12 @@ class UserProfileDto {
 
   @ApiProperty({
     required: true,
+  })
+  @Transform(({ value, key, obj, type }) => {
+    console.log({ value, key, obj, type });
+    if (value.toString() === 'Invalid Date') {
+    }
+    return value;
   })
   @IsDate()
   @MaxDate(

@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { ProductSearchDto } from './dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiExcludeEndpoint, ApiTags } from '@nestjs/swagger';
 import { AuthGuard, HasProfileGuard } from 'src/user/guards';
 import { CurrentUser } from 'src/user/decorator';
 import { UserDocument } from 'src/user/schemas';
@@ -20,6 +20,7 @@ import { IProductSearch } from './types';
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
   @Get()
+  @ApiExcludeEndpoint()
   @UseGuards(AuthGuard)
   @UseGuards(HasProfileGuard)
   getProducts() {
