@@ -7,7 +7,9 @@ import {
 } from '@nestjs/common';
 import { ExerciseService } from './exercise.service';
 import { ExerciseSearchDto } from './dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('exercises')
 @Controller('exercises')
 export class ExerciseController {
   constructor(private readonly exerciseService: ExerciseService) {}

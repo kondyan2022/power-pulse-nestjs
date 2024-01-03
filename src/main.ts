@@ -11,12 +11,22 @@ async function bootstrap() {
     .setTitle('Power pulse')
     .setDescription('The power-pulse API description')
     .setVersion('1.0')
+    .addServer('http://localhost:3000/', 'Local environment')
+    .addServer('https://power-pulse-service.onrender.com/', '')
     .addTag('users')
     .addTag('products')
     .addTag('exercises')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'token',
+    )
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api-docs', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true, // this
+    },
+  });
 
   await app.listen(PORT);
 }

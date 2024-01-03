@@ -6,6 +6,11 @@ import { UserLoginDto, UserRegisterDto } from './dto';
 import { compare, hash } from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { sign } from 'jsonwebtoken';
+import {
+  IUserCurrentResponse,
+  IUserLoginResponse,
+  IUserRegisterResponse,
+} from './types';
 
 const DEFAULT_AVATAR =
   'https://res.cloudinary.com/dfhl9z7ez/image/upload/v1698618013/avatars/noavatar.png';
@@ -17,7 +22,9 @@ export class UserService {
     private user: mongoose.Model<User>,
     private configService: ConfigService,
   ) {}
-  async registration(userRegisterDto: UserRegisterDto): Promise<any> {
+  async registration(
+    userRegisterDto: UserRegisterDto,
+  ): Promise<IUserRegisterResponse> {
     const { email, password } = userRegisterDto;
     const user = await this.user.findOne({ email });
 
@@ -57,7 +64,7 @@ export class UserService {
     return this.user.findById(id);
   }
 
-  async login(userRegisterDto: UserLoginDto): Promise<any> {
+  async login(userRegisterDto: UserLoginDto): Promise<IUserLoginResponse> {
     const { email, password } = userRegisterDto;
     let user = await this.user.findOne({ email });
     if (!user) {
@@ -96,7 +103,7 @@ export class UserService {
     };
   }
 
-  getCurrent(currentUser: UserDocument) {
+  getCurrent(currentUser: UserDocument): IUserCurrentResponse {
     const { _id, name, email, avatarURL, profile, createdAt } = currentUser;
     return { _id, name, email, avatarURL, profile, createdAt };
   }
@@ -106,7 +113,7 @@ export class UserService {
     await this.user.findByIdAndUpdate(_id, { token: '' });
   }
 
-  async updateProfile(user, body) {
+  async updateProfile(user, body): Promise<IUserCurrentResponse> {
     const { _id } = user;
     return await this.user.findByIdAndUpdate(_id, body, {
       new: true,
