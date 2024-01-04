@@ -1,6 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, SchemaTimestampsConfig } from 'mongoose';
 
+export type ProfileDocument = HydratedDocument<Profile>;
+
 @Schema({
   _id: false,
   toJSON: { virtuals: true },
@@ -63,6 +65,8 @@ class Profile {
 
   @Prop({ default: 110 })
   DSN: number;
+
+  BMR: number;
 }
 
 export type UserDocument = HydratedDocument<User> & SchemaTimestampsConfig;
