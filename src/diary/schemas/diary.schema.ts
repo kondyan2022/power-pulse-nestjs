@@ -4,7 +4,7 @@ import { HydratedDocument, SchemaTimestampsConfig, Types } from 'mongoose';
 @Schema()
 class productItemModel {
   @Prop({ type: Types.ObjectId, ref: 'Product' })
-  productId: { type: Types.ObjectId; ref: 'Product' };
+  product: { type: Types.ObjectId; ref: 'Product' };
 
   @Prop({ required: true })
   title: string;
@@ -24,7 +24,7 @@ class productItemModel {
 
 class exerciseItemModel {
   @Prop({ type: Types.ObjectId, ref: 'Exercise' })
-  exerciseId: { type: Types.ObjectId; ref: 'Exercise' };
+  exercise: { type: Types.ObjectId; ref: 'Exercise' };
 
   @Prop({ required: true })
   bodyPart: string;

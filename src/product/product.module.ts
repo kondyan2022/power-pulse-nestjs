@@ -15,5 +15,6 @@ import { HasProfileGuard } from 'src/user/guards';
   ],
   controllers: [ProductController],
   providers: [ProductService, HasProfileGuard],
+  exports: [ProductService],
 })
 export class ProductModule {}
