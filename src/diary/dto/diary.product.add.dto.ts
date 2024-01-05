@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsNotEmpty, IsString, Matches, Min } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsInt, IsNotEmpty, IsString, Min } from 'class-validator';
+import { validateAndReverseDate } from 'src/helpers';
 
 export class DiaryProductAddDto {
   @ApiProperty({ required: true, description: 'Product ID' })
@@ -10,10 +12,7 @@ export class DiaryProductAddDto {
   @ApiProperty({ required: true, description: 'Operation date' })
   @IsNotEmpty()
   @IsString()
-  @Matches(
-    /^(19[0-9][0-9]|20[012][0-9])(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/,
-    { message: 'Invalid data format. YYYYMMDD required!' },
-  )
+  @Transform(({ value }) => validateAndReverseDate(value))
   date: string;
 
   @ApiProperty({ required: true, description: 'QTY product' })

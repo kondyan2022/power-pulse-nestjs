@@ -21,8 +21,7 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
   @Get()
   @ApiExcludeEndpoint()
-  @UseGuards(AuthGuard)
-  @UseGuards(HasProfileGuard)
+  @UseGuards(AuthGuard, HasProfileGuard)
   getProducts() {
     return this.productService.getProducts();
   }
@@ -32,8 +31,7 @@ export class ProductController {
     return this.productService.getCategories();
   }
   @Get('search')
-  @UseGuards(AuthGuard)
-  @UseGuards(HasProfileGuard)
+  @UseGuards(AuthGuard, HasProfileGuard)
   @UsePipes(
     new ValidationPipe({
       transform: true,

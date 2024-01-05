@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Diary } from './schemas/diary.schema';
 import mongoose from 'mongoose';
 import { UserDocument } from 'src/user/schemas';
 import { Product } from 'src/product/schemas';
-import { DiaryProductAddDto } from './dto';
+import { DiaryExerciseAddDto, DiaryProductAddDto } from './dto';
+import { reverseToNormalDate } from 'src/helpers';
+import { Exercise } from 'src/exercise/schemas';
 
 @Injectable()
 export class DiaryService {
@@ -13,6 +15,8 @@ export class DiaryService {
     private diaryModel: mongoose.Model<Diary>,
     @InjectModel(Product.name)
     private productModel: mongoose.Model<Product>,
+    @InjectModel(Exercise.name)
+    private exerciseModel: mongoose.Model<Exercise>,
   ) {}
 
   async diaryByDate(user: UserDocument, date: string) {
@@ -35,11 +39,11 @@ export class DiaryService {
         leftCalories: BMR,
       };
     }
-    // diaryItem.date = reverseDate(diaryItem.date);
+    diaryItem.date = reverseToNormalDate(diaryItem.date);
     return diaryItem;
   }
 
-  async postProductsToDiary(
+  async postProductToDiary(
     user: UserDocument,
     diaryProductAddDto: DiaryProductAddDto,
   ) {
@@ -60,71 +64,104 @@ export class DiaryService {
     }
     const productItem = await this.productModel.findById(product);
     if (!productItem) {
-      // throw HttpError(400, `Product with id=${productId} not found`);
+      throw new HttpException(
+        `Product with id=${product} not found`,
+        HttpStatus.NOT_FOUND,
+      );
     }
     const { title, category, groupBloodNotAllowed } = productItem;
-    diaryItem = await this.diaryModel
-      .findByIdAndUpdate(
-        diaryItem._id,
-        {
-          $push: {
-            products: {
-              product,
-              title,
-              category,
-              weight: amount,
-              consumeCalories,
-              recommend: !groupBloodNotAllowed[blood],
-            },
+    diaryItem = await this.diaryModel.findByIdAndUpdate(
+      diaryItem._id,
+      {
+        $push: {
+          products: {
+            title,
+            category,
+            weight: amount,
+            consumeCalories,
+            recommend: !groupBloodNotAllowed[blood],
           },
         },
-        {
-          new: true,
-          select: '-createdAt -updatedAt ',
-        },
-      )
-      .populate('products.product');
-    console.log(diaryItem);
-    // diaryItem.date = reverseDate(diaryItem.date);
+      },
+      {
+        new: true,
+        select: '-createdAt -updatedAt ',
+      },
+    );
+
+    diaryItem.date = reverseToNormalDate(diaryItem.date);
     return diaryItem;
   }
-  //   async postProductsToDiary(user, body) {
 
-  //     const {
-  //       product: productId,
-  //       date,
-  //       amount,
-  //       calories: consumeCalories,
-  //     } = body;
-  //     let diaryItem = await this.diaryModel.findOne({ date, owner: _id });
-  //     if (!diaryItem) {
-  //       diaryItem = await this.diaryModel.create({ date, owner: _id, DSN, BMR });
-  //     }
-  //     const product = await this.productModel.findById(productId);
-  //     if (!product) {
-  //       throw HttpError(400, `Product with id=${productId} not found`);
-  //     }
+  async postExerciseToDiary(
+    user: UserDocument,
+    diaryExerciseAddDto: DiaryExerciseAddDto,
+  ) {
+    const {
+      _id,
+      profile: { BMR, DSN },
+    } = user;
+    const {
+      exercise,
+      date,
+      time,
+      calories: burnedCalories,
+    } = diaryExerciseAddDto;
+    let diaryItem = await this.diaryModel.findOne({ date, owner: _id });
+    if (!diaryItem) {
+      diaryItem = await this.diaryModel.create({ date, owner: _id, DSN, BMR });
+    }
+    const exerciseItem = await this.exerciseModel.findById(exercise);
+    if (!exerciseItem) {
+      throw new HttpException(
+        `Exercise with id=${exercise} not found`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
 
-  //     const { title, category, groupBloodNotAllowed } = product;
-  //     diaryItem = await this.diaryModel.findByIdAndUpdate(
-  //       diaryItem._id,
-  //       {
-  //         $push: {
-  //           products: {
-  //             title,
-  //             category,
-  //             weight: amount,
-  //             consumeCalories,
-  //             recommend: !groupBloodNotAllowed[blood],
-  //           },
-  //         },
-  //       },
-  //       {
-  //         new: true,
-  //         select: '-createdAt -updatedAt ',
-  //       },
-  //     );
-  //     // diaryItem.date = reverseDate(diaryItem.date);
-  //     return diaryItem;
-  //   }
+    const { bodyPart, equipment, name, target } = exerciseItem;
+    diaryItem = await this.diaryModel.findByIdAndUpdate(
+      diaryItem._id,
+      {
+        $push: {
+          exercises: {
+            bodyPart,
+            equipment,
+            name,
+            target,
+            time,
+            burnedCalories,
+          },
+        },
+      },
+      {
+        new: true,
+        select: '-createdAt -updatedAt ',
+      },
+    );
+    diaryItem.date = reverseToNormalDate(diaryItem.date);
+
+    return diaryItem;
+  }
+  async deleteFromDiary(user, dto) {
+    const { _id } = user;
+    const { date, itemid, tablename } = dto;
+
+    let diaryItem = await this.diaryModel.findOne({ date, owner: _id });
+
+    if (!diaryItem) {
+      throw new HttpException(`Diary not found`, HttpStatus.NOT_FOUND);
+    }
+    diaryItem = await this.diaryModel.findByIdAndUpdate(
+      diaryItem._id,
+      {
+        $pull: {
+          [tablename]: { _id: itemid },
+        },
+      },
+      { new: true, select: '-createdAt -updatedAt ' },
+    );
+    diaryItem.date = reverseToNormalDate(diaryItem.date);
+    return diaryItem;
+  }
 }
