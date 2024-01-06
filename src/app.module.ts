@@ -10,6 +10,7 @@ import { ExerciseModule } from './exercise/exercise.module';
 import { UserModule } from './user/user.module';
 import { AuthMiddleware } from './user/middlewares';
 import { DiaryModule } from './diary/diary.module';
+import { StatsModule } from './stats/stats.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { DiaryModule } from './diary/diary.module';
     ExerciseModule,
     UserModule,
     DiaryModule,
+    StatsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

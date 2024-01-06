@@ -1,11 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsInt, IsNotEmpty, IsString, Min } from 'class-validator';
+import { IsInt, IsMongoId, IsNotEmpty, IsString, Min } from 'class-validator';
 import { validateAndReverseDate } from 'src/helpers';
 
 export class DiaryProductAddDto {
   @ApiProperty({ required: true, description: 'Product ID' })
   @IsNotEmpty()
+  @IsMongoId()
   @IsString()
   product: string;
 

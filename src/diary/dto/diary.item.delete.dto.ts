@@ -1,11 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsNotEmpty, IsString, Matches } from 'class-validator';
+import { IsMongoId, IsNotEmpty, IsString, Matches } from 'class-validator';
 import { validateAndReverseDate } from 'src/helpers';
 
 export class DiaryItemDeleteDto {
   @ApiProperty({ required: true, description: 'Item ID' })
   @IsNotEmpty()
+  @IsMongoId()
   @IsString()
   itemid: string;
 
