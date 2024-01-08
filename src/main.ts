@@ -14,11 +14,11 @@ async function bootstrap() {
     .setVersion('1.0')
     .addServer('http://localhost:3000/', 'Local environment')
     .addServer('https://power-pulse-service.onrender.com/', '')
-    .addTag('users')
-    .addTag('products')
-    .addTag('exercises')
-    .addTag('diary')
-    .addTag('stats')
+    .addTag('users', 'Authorization endpoints')
+    .addTag('products', 'Products endpoints')
+    .addTag('exercises', 'Exercises endpoints')
+    .addTag('diary', 'Diaries endpoints')
+    .addTag('stats', 'Statistics endpoints')
     .addBearerAuth(
       { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
       'token',

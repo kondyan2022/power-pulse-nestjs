@@ -4,7 +4,12 @@ import { Diary } from './schemas/diary.schema';
 import mongoose from 'mongoose';
 import { UserDocument } from 'src/user/schemas';
 import { Product } from 'src/product/schemas';
-import { DiaryExerciseAddDto, DiaryProductAddDto } from './dto';
+import {
+  DiaryDeleteFromListDto,
+  DiaryExerciseAddDto,
+  DiaryItemDeleteDto,
+  DiaryProductAddDto,
+} from './dto';
 import { reverseToNormalDate } from 'src/helpers';
 import { Exercise } from 'src/exercise/schemas';
 
@@ -143,7 +148,7 @@ export class DiaryService {
 
     return diaryItem;
   }
-  async deleteFromDiary(user, dto) {
+  async deleteFromDiary(user: UserDocument, dto: DiaryItemDeleteDto) {
     const { _id } = user;
     const { date, itemid, tablename } = dto;
 
@@ -157,6 +162,57 @@ export class DiaryService {
       {
         $pull: {
           [tablename]: { _id: itemid },
+        },
+      },
+      { new: true, select: '-createdAt -updatedAt ' },
+    );
+    diaryItem.date = reverseToNormalDate(diaryItem.date);
+    return diaryItem;
+  }
+  async deleteProductFromDiary(
+    user: UserDocument,
+    dto: DiaryDeleteFromListDto,
+  ) {
+    const { _id } = user;
+    const { date, itemid } = dto;
+
+    let diaryItem = await this.diaryModel.findOne({ date, owner: _id });
+
+    if (!diaryItem) {
+      throw new HttpException(`Diary not found`, HttpStatus.NOT_FOUND);
+    }
+
+    diaryItem = await this.diaryModel.findByIdAndUpdate(
+      diaryItem._id,
+      {
+        $pull: {
+          products: { _id: itemid },
+        },
+      },
+      { new: true, select: '-createdAt -updatedAt ' },
+    );
+    diaryItem.date = reverseToNormalDate(diaryItem.date);
+    return diaryItem;
+  }
+
+  async deleteExerciseFromDiary(
+    user: UserDocument,
+    dto: DiaryDeleteFromListDto,
+  ) {
+    const { _id } = user;
+    const { date, itemid } = dto;
+
+    let diaryItem = await this.diaryModel.findOne({ date, owner: _id });
+
+    if (!diaryItem) {
+      throw new HttpException(`Diary not found`, HttpStatus.NOT_FOUND);
+    }
+
+    diaryItem = await this.diaryModel.findByIdAndUpdate(
+      diaryItem._id,
+      {
+        $pull: {
+          exercises: { _id: itemid },
         },
       },
       { new: true, select: '-createdAt -updatedAt ' },

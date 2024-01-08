@@ -9,12 +9,13 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DiaryService } from './diary.service';
 import { AuthGuard, HasProfileGuard } from 'src/user/guards';
 import { CurrentUser } from 'src/user/decorator';
 import { UserDocument } from 'src/user/schemas';
 import {
+  DiaryDeleteFromListDto,
   DiaryExerciseAddDto,
   DiaryItemDeleteDto,
   DiaryProductAddDto,
@@ -25,6 +26,10 @@ import {
 @Controller('diary')
 export class DiaryController {
   constructor(private readonly diaryService: DiaryService) {}
+
+  @ApiOperation({
+    description: "Get a page of user's diary on date",
+  })
   @Get(':date')
   @UseGuards(AuthGuard, HasProfileGuard)
   diaryByDate(
@@ -34,6 +39,10 @@ export class DiaryController {
     return this.diaryService.diaryByDate(currentUser, date);
   }
 
+  @ApiOperation({
+    description:
+      "Add data about the consumed product to the user's diary page for the date",
+  })
   @Post('/product')
   @UseGuards(AuthGuard, HasProfileGuard)
   @UsePipes(
@@ -51,6 +60,11 @@ export class DiaryController {
       diaryProductAddDto,
     );
   }
+
+  @ApiOperation({
+    description:
+      "Add data about the completed exercise to the user's diary page for the date",
+  })
   @Post('/exercise')
   @UseGuards(AuthGuard, HasProfileGuard)
   @UsePipes(
@@ -68,6 +82,49 @@ export class DiaryController {
       diaryExerciseAddDto,
     );
   }
+
+  @ApiOperation({
+    description:
+      "Delete data about the consumed product from the user's diary page for the date",
+  })
+  @Delete('/product')
+  @UseGuards(AuthGuard, HasProfileGuard)
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+    }),
+  )
+  async deleteProductFromDiary(
+    @CurrentUser() user: UserDocument,
+    @Body() dto: DiaryDeleteFromListDto,
+  ) {
+    return this.diaryService.deleteProductFromDiary(user, dto);
+  }
+
+  @ApiOperation({
+    description:
+      "Delete data about the completed exercise from the user's diary page for the date",
+  })
+  @Delete('/exercise')
+  @UseGuards(AuthGuard, HasProfileGuard)
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+    }),
+  )
+  async deleteExerciseFromDiary(
+    @CurrentUser() user: UserDocument,
+    @Body() dto: DiaryDeleteFromListDto,
+  ) {
+    return this.diaryService.deleteExerciseFromDiary(user, dto);
+  }
+
+  @ApiOperation({
+    description:
+      "Delete data about the completed exercise or consumed product from the user's diary page for the date",
+  })
   @Delete('/item')
   @UseGuards(AuthGuard, HasProfileGuard)
   @UsePipes(

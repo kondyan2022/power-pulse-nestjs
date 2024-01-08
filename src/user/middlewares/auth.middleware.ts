@@ -33,7 +33,6 @@ export class AuthMiddleware implements NestMiddleware {
         return;
       }
       req.user = user;
-      console.log({ user });
     } catch (error) {
       req.user = null;
     }

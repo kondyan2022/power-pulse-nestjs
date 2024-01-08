@@ -27,7 +27,14 @@ import {
   IUserRegisterResponse,
 } from './types';
 import { UserUpdateDto } from './dto/user.update.dto';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiExcludeEndpoint,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 import { cloudinaryStorage } from 'src/configs/cloudinary.config';
@@ -41,6 +48,8 @@ export class UserController {
     private readonly userService: UserService,
     private readonly configService: ConfigService,
   ) {}
+
+  @ApiOperation({ description: 'Register new a user' })
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @UsePipes(
@@ -55,6 +64,7 @@ export class UserController {
     return this.userService.registration(userRegisterDto);
   }
 
+  @ApiOperation({ description: 'User login' })
   @Post('login')
   @UsePipes(
     new ValidationPipe({
@@ -66,6 +76,7 @@ export class UserController {
     return this.userService.login(userLoginDto);
   }
 
+  @ApiOperation({ description: 'Get current user information' })
   @Get('current')
   @ApiBearerAuth('token')
   @UseGuards(AuthGuard)
@@ -73,6 +84,7 @@ export class UserController {
     return this.userService.getCurrent(user);
   }
 
+  @ApiOperation({ description: 'Logout the user' })
   @Post('logout')
   @ApiBearerAuth('token')
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -81,6 +93,7 @@ export class UserController {
     return this.userService.logout(user);
   }
 
+  @ApiOperation({ description: 'Update user information' })
   @Put()
   @ApiBearerAuth('token')
   @UseGuards(AuthGuard)
@@ -97,6 +110,7 @@ export class UserController {
     return this.userService.updateProfile(user, body);
   }
 
+  @ApiOperation({ description: 'Upload and update user avatar' })
   @Patch('avatars')
   @ApiBearerAuth('token')
   @UseGuards(AuthGuard)
@@ -118,6 +132,7 @@ export class UserController {
     return file?.path;
   }
 
+  @ApiExcludeEndpoint()
   @Get('google')
   @HttpCode(HttpStatus.FOUND)
   @Redirect()
@@ -125,12 +140,14 @@ export class UserController {
     return this.userService.googleAuth();
   }
 
+  @ApiExcludeEndpoint()
   @Get('google-redirect')
   @Redirect()
   async googleRedirect(@Req() request: Request, @Query('code') code: string) {
     return this.userService.googleRedirect(code);
   }
 
+  @ApiExcludeEndpoint()
   @Post('googlelogin')
   @UsePipes(new ValidationPipe())
   async googleLogin(

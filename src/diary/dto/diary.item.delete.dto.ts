@@ -1,20 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import { IsMongoId, IsNotEmpty, IsString, Matches } from 'class-validator';
-import { validateAndReverseDate } from 'src/helpers';
+import { IsNotEmpty, IsString, Matches } from 'class-validator';
+import { DiaryDeleteFromListDto } from './diary.deleteFromList.dto';
 
-export class DiaryItemDeleteDto {
-  @ApiProperty({ required: true, description: 'Item ID' })
-  @IsNotEmpty()
-  @IsMongoId()
-  @IsString()
-  itemid: string;
-
-  @ApiProperty({ required: true, description: 'Operation date' })
-  @IsNotEmpty()
-  @IsString()
-  @Transform(({ value }) => validateAndReverseDate(value))
-  date: string;
+export class DiaryItemDeleteDto extends DiaryDeleteFromListDto {
   @ApiProperty({
     required: true,
     description: 'Table name',

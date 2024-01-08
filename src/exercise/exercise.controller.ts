@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { ExerciseService } from './exercise.service';
 import { ExerciseSearchDto } from './dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/user/guards';
 
 @ApiBearerAuth('token')
@@ -16,13 +16,27 @@ import { AuthGuard } from 'src/user/guards';
 @Controller('exercises')
 export class ExerciseController {
   constructor(private readonly exerciseService: ExerciseService) {}
-
+  @ApiOperation({
+    description: 'Get a full list of exercises',
+  })
+  @Get()
+  @UseGuards(AuthGuard)
+  getExercises() {
+    return this.exerciseService.getExercise();
+  }
+  @ApiOperation({
+    description: 'Get a full list of exercise groups ',
+  })
   @Get('exerciseGroups')
   @UseGuards(AuthGuard)
   getExerciseGroups() {
     return this.exerciseService.getExerciseGroups();
   }
 
+  @ApiOperation({
+    description:
+      'Get a list of exercises with filtering and pagination options',
+  })
   @Get('search')
   @UseGuards(AuthGuard)
   @UsePipes(
