@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './schemas';
 import * as mongoose from 'mongoose';
-import { UserLoginDto, UserRegisterDto } from './dto';
+import { UserLoginDto, UserRegisterDto, UserUpdateDto } from './dto';
 import { compare, hash } from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { sign } from 'jsonwebtoken';
@@ -11,6 +11,7 @@ import {
   IUserLoginResponse,
   IUserRegisterResponse,
 } from './types';
+import { HttpService } from '@nestjs/axios';
 
 const DEFAULT_AVATAR =
   'https://res.cloudinary.com/dfhl9z7ez/image/upload/v1698618013/avatars/noavatar.png';
@@ -19,8 +20,9 @@ const DEFAULT_AVATAR =
 export class UserService {
   constructor(
     @InjectModel(User.name)
-    private user: mongoose.Model<User>,
-    private configService: ConfigService,
+    private readonly user: mongoose.Model<User>,
+    private readonly configService: ConfigService,
+    private readonly httpService: HttpService,
   ) {}
   async registration(
     userRegisterDto: UserRegisterDto,
@@ -113,12 +115,116 @@ export class UserService {
     await this.user.findByIdAndUpdate(_id, { token: '' });
   }
 
-  async updateProfile(user, body): Promise<IUserCurrentResponse> {
+  async updateProfile(
+    user: UserDocument,
+    body: UserUpdateDto,
+  ): Promise<IUserCurrentResponse> {
     const { _id } = user;
     return await this.user.findByIdAndUpdate(_id, body, {
       new: true,
       select:
         '-updatedAt -password -token -verify -verificationToken -googleRedirected',
     });
+  }
+
+  googleAuth() {
+    const stringifiedParams = new URLSearchParams({
+      client_id: this.configService.get('GOOGLE_CLIENT_ID'),
+      redirect_uri: `${this.configService.get(
+        'BASE_URL',
+      )}/users/google-redirect`,
+      scope: [
+        'https://www.googleapis.com/auth/userinfo.email',
+        'https://www.googleapis.com/auth/userinfo.profile',
+      ].join(' '),
+      response_type: 'code',
+      access_type: 'offline',
+      prompt: 'consent',
+    }).toString();
+    console.log(stringifiedParams);
+    return {
+      url: `https://accounts.google.com/o/oauth2/v2/auth?${stringifiedParams}`,
+    };
+  }
+
+  async googleRedirect(code: string) {
+    const tokenData = await this.httpService.axiosRef({
+      url: `https://oauth2.googleapis.com/token`,
+      method: 'post',
+      data: {
+        client_id: process.env.GOOGLE_CLIENT_ID,
+        client_secret: process.env.GOOGLE_CLIENT_SECRET,
+        redirect_uri: `${process.env.BASE_URL}/users/google-redirect`,
+        grant_type: 'authorization_code',
+        code,
+      },
+    });
+
+    const userData = await this.httpService.axiosRef({
+      url: 'https://www.googleapis.com/oauth2/v2/userinfo',
+      method: 'get',
+      headers: {
+        Authorization: `Bearer ${tokenData.data.access_token}`,
+      },
+    });
+    const { email, name, picture } = userData.data;
+    let user = await this.user.findOne({ email });
+    if (!user) {
+      const hashPassword = await hash('google authorization', 10);
+      const avatarURL = picture;
+      const verificationToken = 'No'; // Токен при verify = true не має значення
+      const verify = true; //Email - вважаємо перевірено при створенні
+
+      user = await this.user.create({
+        name,
+        email,
+        avatarURL,
+        password: hashPassword,
+        verificationToken,
+        verify,
+      });
+    }
+
+    const payload = { id: user._id };
+    const secretKey = await this.configService.get('SECRET_KEY');
+    const token = sign(payload, secretKey, {
+      expiresIn: '23h',
+    });
+    await this.user.findByIdAndUpdate(user._id, {
+      token,
+      googleRedirected: true,
+    });
+
+    return {
+      url: `${this.configService.get(
+        'FRONTEND_URL',
+      )}/googlelogin?email=${email}`,
+    };
+  }
+
+  async googleLogin(email: string): Promise<IUserLoginResponse> {
+    let user = await this.user.findOne({ email });
+    if (!user) {
+      throw new HttpException(
+        'Email or password is wrong',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+    const payload = { id: user._id };
+    const secretKey = await this.configService.get('SECRET_KEY');
+    const token = sign(payload, secretKey, { expiresIn: '23h' });
+    user = await this.user.findByIdAndUpdate(
+      user._id,
+      { token, googleRedirected: false },
+      {
+        new: true,
+        select:
+          '-updatedAt -password -token -verify -verificationToken -googleRedirected',
+      },
+    );
+    return {
+      token,
+      user,
+    };
   }
 }

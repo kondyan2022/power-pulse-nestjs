@@ -1,7 +1,7 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Response, NextFunction } from 'express';
-import { verify } from 'jsonwebtoken';
+import { JwtPayload, verify } from 'jsonwebtoken';
 import { IExpressRequest } from 'src/types';
 import { UserService } from '../user.service';
 
@@ -25,7 +25,7 @@ export class AuthMiddleware implements NestMiddleware {
     }
     try {
       const secretKey = await this.configService.get('SECRET_KEY');
-      const { id } = verify(token, secretKey);
+      const { id } = verify(token, secretKey) as JwtPayload;
       const user = await this.userService.findById(id);
       if (!user || !user.token || user.token !== token) {
         req.user = null;
@@ -33,6 +33,7 @@ export class AuthMiddleware implements NestMiddleware {
         return;
       }
       req.user = user;
+      console.log({ user });
     } catch (error) {
       req.user = null;
     }

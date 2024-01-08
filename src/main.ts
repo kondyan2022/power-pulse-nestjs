@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import * as morgan from 'morgan';
 
 const { PORT = 3000 } = process.env;
 
@@ -29,7 +30,8 @@ async function bootstrap() {
       persistAuthorization: true,
     },
   });
-
+  app.enableCors();
+  app.use(morgan('tiny'));
   await app.listen(PORT);
 }
 bootstrap();

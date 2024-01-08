@@ -4,14 +4,20 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Patch,
   Post,
   Put,
+  Query,
+  Redirect,
+  Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { UserLoginDto, UserRegisterDto } from './dto';
+import { UserGoogleLoginDto, UserLoginDto, UserRegisterDto } from './dto';
 import { CurrentUser } from './decorator/decorator.user';
 import { UserDocument } from './schemas';
 import { AuthGuard } from './guards';
@@ -21,12 +27,20 @@ import {
   IUserRegisterResponse,
 } from './types';
 import { UserUpdateDto } from './dto/user.update.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+
+import { cloudinaryStorage } from 'src/configs/cloudinary.config';
+import { ConfigService } from '@nestjs/config';
+import { Request } from 'express';
 
 @ApiTags('users')
 @Controller('users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly configService: ConfigService,
+  ) {}
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @UsePipes(
@@ -81,5 +95,47 @@ export class UserController {
     @Body() body: UserUpdateDto,
   ): Promise<IUserCurrentResponse> {
     return this.userService.updateProfile(user, body);
+  }
+
+  @Patch('avatars')
+  @ApiBearerAuth('token')
+  @UseGuards(AuthGuard)
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['avatar'],
+      properties: {
+        avatar: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @UseInterceptors(FileInterceptor('avatar', { storage: cloudinaryStorage }))
+  updateAvatar(@UploadedFile() file: Express.Multer.File): string {
+    return file?.path;
+  }
+
+  @Get('google')
+  @HttpCode(HttpStatus.FOUND)
+  @Redirect()
+  async googleAuth() {
+    return this.userService.googleAuth();
+  }
+
+  @Get('google-redirect')
+  @Redirect()
+  async googleRedirect(@Req() request: Request, @Query('code') code: string) {
+    return this.userService.googleRedirect(code);
+  }
+
+  @Post('googlelogin')
+  @UsePipes(new ValidationPipe())
+  async googleLogin(
+    @Body() { email }: UserGoogleLoginDto,
+  ): Promise<IUserLoginResponse> {
+    return this.userService.googleLogin(email);
   }
 }
