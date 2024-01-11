@@ -16,13 +16,13 @@ export class DiaryProductAddDto {
   @Transform(({ value }) => validateAndReverseDate(value))
   date: string;
 
-  @ApiProperty({ required: true, description: 'QTY product' })
+  @ApiProperty({ required: true, description: 'QTY product', minimum: 1 })
   @IsNotEmpty()
   @IsInt()
   @Min(1)
   amount: number;
 
-  @ApiProperty({ required: true, description: 'Consumed calories' })
+  @ApiProperty({ required: true, description: 'Consumed calories', minimum: 1 })
   @IsNotEmpty()
   @IsInt()
   @Min(1)

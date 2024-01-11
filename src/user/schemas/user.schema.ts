@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { HydratedDocument, SchemaTimestampsConfig } from 'mongoose';
 
 export type ProfileDocument = HydratedDocument<Profile>;
@@ -25,15 +26,19 @@ export type ProfileDocument = HydratedDocument<Profile>;
   },
 })
 class Profile {
+  @ApiProperty({ required: true })
   @Prop({ min: [150, 'Must be at least 150, got {VALUE}!'], required: true })
   height: number;
 
+  @ApiProperty({ required: true })
   @Prop({ min: [35, 'Must be at least 35, got {VALUE}!'], required: true })
   currentWeight: number;
 
+  @ApiProperty({ required: true })
   @Prop({ min: [35, 'Must be at least 35, got {VALUE}!'], required: true })
   desiredWeight: number;
 
+  @ApiProperty({ required: true })
   @Prop({
     validate: {
       validator: function (v) {
@@ -47,25 +52,27 @@ class Profile {
     required: true,
   })
   birthday: Date;
-
+  @ApiProperty({ required: true })
   @Prop({
     enum: [1, 2, 3, 4],
     required: true,
   })
   blood: number;
 
+  @ApiProperty({ required: true })
   @Prop({
     enum: ['male', 'female'],
     required: true,
   })
   sex: string;
 
+  @ApiProperty({ required: true })
   @Prop({ enum: [1, 2, 3, 4, 5], required: true })
   levelActivity: number;
-
+  @ApiProperty({ required: true })
   @Prop({ default: 110 })
   DSN: number;
-
+  @ApiProperty({ required: true })
   BMR: number;
 }
 
@@ -73,6 +80,7 @@ export type UserDocument = HydratedDocument<User> & SchemaTimestampsConfig;
 
 @Schema({ versionKey: false, timestamps: true })
 export class User {
+  @ApiProperty()
   @Prop({
     min: [2, 'Minimum 2 symbol'],
     required: [true, 'Set name for user'],
@@ -84,12 +92,17 @@ export class User {
   })
   password: string;
 
+  @ApiProperty()
   @Prop({
     required: [true, 'Email is required'],
     unique: true,
   })
   email: string;
 
+  @ApiProperty({
+    example:
+      'https://res.cloudinary.com/dfhl9z7ez/image/upload/v1698618013/avatars/noavatar.png',
+  })
   @Prop()
   avatarURL: string;
 
@@ -105,6 +118,7 @@ export class User {
   @Prop({ required: [true, 'Verify token is required'] })
   verificationToken: string;
 
+  @ApiPropertyOptional()
   @Prop()
   profile: Profile;
 }

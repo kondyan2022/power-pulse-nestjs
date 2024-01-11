@@ -1,16 +1,18 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument } from './schemas';
+import {
+  AvatarResponse,
+  User,
+  UserDocument,
+  UserLoginResponse,
+  UserRegisterResponse,
+  UserResponse,
+} from './schemas';
 import * as mongoose from 'mongoose';
 import { UserLoginDto, UserRegisterDto, UserUpdateDto } from './dto';
 import { compare, hash } from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { sign } from 'jsonwebtoken';
-import {
-  IUserCurrentResponse,
-  IUserLoginResponse,
-  IUserRegisterResponse,
-} from './types';
 import { HttpService } from '@nestjs/axios';
 
 const DEFAULT_AVATAR =
@@ -26,7 +28,7 @@ export class UserService {
   ) {}
   async registration(
     userRegisterDto: UserRegisterDto,
-  ): Promise<IUserRegisterResponse> {
+  ): Promise<UserRegisterResponse> {
     const { email, password } = userRegisterDto;
     const user = await this.user.findOne({ email });
 
@@ -66,7 +68,7 @@ export class UserService {
     return this.user.findById(id);
   }
 
-  async login(userRegisterDto: UserLoginDto): Promise<IUserLoginResponse> {
+  async login(userRegisterDto: UserLoginDto): Promise<UserLoginResponse> {
     const { email, password } = userRegisterDto;
     let user = await this.user.findOne({ email });
     if (!user) {
@@ -105,7 +107,7 @@ export class UserService {
     };
   }
 
-  getCurrent(currentUser: UserDocument): IUserCurrentResponse {
+  getCurrent(currentUser: UserDocument): UserResponse {
     const { _id, name, email, avatarURL, profile, createdAt } = currentUser;
     return { _id, name, email, avatarURL, profile, createdAt };
   }
@@ -118,7 +120,7 @@ export class UserService {
   async updateProfile(
     user: UserDocument,
     body: UserUpdateDto,
-  ): Promise<IUserCurrentResponse> {
+  ): Promise<UserResponse> {
     const { _id } = user;
     return await this.user.findByIdAndUpdate(_id, body, {
       new: true,
@@ -127,7 +129,19 @@ export class UserService {
     });
   }
 
-  googleAuth() {
+  async updateAvatar(
+    user: UserDocument,
+    avatarURL: string,
+  ): Promise<AvatarResponse> {
+    if (!avatarURL) {
+      throw new HttpException('No image file', HttpStatus.BAD_REQUEST);
+    }
+    const { _id } = user;
+    await this.user.findByIdAndUpdate(_id, { avatarURL });
+    return { avatarURL };
+  }
+
+  googleAuth(): { url: string } {
     const stringifiedParams = new URLSearchParams({
       client_id: this.configService.get('GOOGLE_CLIENT_ID'),
       redirect_uri: `${this.configService.get(
@@ -202,7 +216,7 @@ export class UserService {
     };
   }
 
-  async googleLogin(email: string): Promise<IUserLoginResponse> {
+  async googleLogin(email: string): Promise<UserLoginResponse> {
     let user = await this.user.findOne({ email });
     if (!user) {
       throw new HttpException(

@@ -16,13 +16,13 @@ export class DiaryExerciseAddDto {
   @Transform(({ value }) => validateAndReverseDate(value))
   date: string;
 
-  @ApiProperty({ required: true, description: 'Exercise time' })
+  @ApiProperty({ required: true, description: 'Exercise time', minimum: 1 })
   @IsNotEmpty()
   @IsInt()
   @Min(1)
   time: number;
 
-  @ApiProperty({ required: true, description: 'Consumed calories' })
+  @ApiProperty({ required: true, description: 'Consumed calories', minimum: 1 })
   @IsNotEmpty()
   @IsInt()
   @Min(1)

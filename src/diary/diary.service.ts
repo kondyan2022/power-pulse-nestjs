@@ -29,7 +29,10 @@ export class DiaryService {
       _id,
       profile: { DSN, BMR },
     } = user;
-    const diaryItem = await this.diaryModel.findOne({ date, owner: _id });
+    const diaryItem = await this.diaryModel.findOne({
+      date,
+      owner: _id,
+    });
     if (!diaryItem) {
       return {
         owner: _id,
@@ -44,6 +47,7 @@ export class DiaryService {
         leftCalories: BMR,
       };
     }
+
     diaryItem.date = reverseToNormalDate(diaryItem.date);
     return diaryItem;
   }

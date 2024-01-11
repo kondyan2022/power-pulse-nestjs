@@ -8,10 +8,28 @@ import {
 } from '@nestjs/common';
 import { ExerciseService } from './exercise.service';
 import { ExerciseSearchDto } from './dto';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthGuard } from 'src/user/guards';
+import {
+  ExerciseGroupResponse,
+  ExerciseResponse,
+  ExerciseSearchResponse,
+} from './dto/responses';
+import { ErrorResponse } from 'src/types';
 
 @ApiBearerAuth('token')
+@ApiResponse({
+  status: 401,
+  description: 'Not authorized',
+  type: ErrorResponse,
+})
 @ApiTags('exercises')
 @Controller('exercises')
 export class ExerciseController {
@@ -20,12 +38,22 @@ export class ExerciseController {
     description: 'Get a full list of exercises',
   })
   @Get()
+  @ApiOkResponse({
+    description: 'Successful response',
+    type: ExerciseResponse,
+    isArray: true,
+  })
   @UseGuards(AuthGuard)
   getExercises() {
     return this.exerciseService.getExercise();
   }
   @ApiOperation({
     description: 'Get a full list of exercise groups ',
+  })
+  @ApiOkResponse({
+    description: 'Successful response',
+    type: ExerciseGroupResponse,
+    isArray: true,
   })
   @Get('exerciseGroups')
   @UseGuards(AuthGuard)
@@ -38,6 +66,11 @@ export class ExerciseController {
       'Get a list of exercises with filtering and pagination options',
   })
   @Get('search')
+  @ApiOkResponse({
+    description: 'Successful response',
+    type: ExerciseSearchResponse,
+  })
+  @ApiBadRequestResponse({ description: 'Bad request', type: ErrorResponse })
   @UseGuards(AuthGuard)
   @UsePipes(
     new ValidationPipe({

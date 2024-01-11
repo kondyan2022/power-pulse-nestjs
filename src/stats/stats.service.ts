@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import { Diary } from 'src/diary/schemas';
 import { Exercise } from 'src/exercise/schemas';
 import { User } from 'src/user/schemas';
+import { StatsResponse } from './dto/responses';
 
 @Injectable()
 export class StatsService {
@@ -15,7 +16,7 @@ export class StatsService {
     @InjectModel(Exercise.name)
     private exerciseModel: mongoose.Model<Exercise>,
   ) {}
-  async getStats() {
+  async getStats(): Promise<StatsResponse> {
     const stats = await this.diaryModel.aggregate([
       {
         $group: {

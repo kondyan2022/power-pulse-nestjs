@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Redirect } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ApiExcludeEndpoint } from '@nestjs/swagger';
 
@@ -8,7 +8,6 @@ export class AppController {
 
   @ApiExcludeEndpoint()
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
-  }
+  @Redirect('/api-docs')
+  getHello() {}
 }
