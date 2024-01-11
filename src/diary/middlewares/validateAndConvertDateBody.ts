@@ -18,7 +18,6 @@ export class ValidateAndConvertDateBody implements NestMiddleware {
       return { year, month, day };
     };
 
-    console.log('middleware run ');
     const date = req.body.date;
     const regex =
       /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/(19[0-9][0-9]|20[012][0-9])$/;

@@ -12,8 +12,8 @@ async function bootstrap() {
     .setTitle('Power pulse')
     .setDescription('The power-pulse API description')
     .setVersion('1.0')
+    .addServer(process.env.BASE_URL, '')
     .addServer('http://localhost:3000/', 'Local environment')
-    .addServer('https://power-pulse-service.onrender.com/', '')
     .addTag('users', 'Authorization endpoints')
     .addTag('products', 'Products endpoints')
     .addTag('exercises', 'Exercises endpoints')
@@ -30,7 +30,6 @@ async function bootstrap() {
       persistAuthorization: true,
     },
   });
-  app.enableCors();
   app.use(morgan('tiny'));
   await app.listen(PORT);
 }

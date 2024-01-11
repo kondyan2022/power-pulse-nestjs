@@ -61,8 +61,7 @@ class UserProfileDto {
   @ApiProperty({
     required: true,
   })
-  @Transform(({ value, key, obj, type }) => {
-    console.log({ value, key, obj, type });
+  @Transform(({ value }) => {
     if (value.toString() === 'Invalid Date') {
     }
     return value;
