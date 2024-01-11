@@ -30,6 +30,7 @@ async function bootstrap() {
       persistAuthorization: true,
     },
   });
+  app.enableCors();
   app.use(morgan('tiny'));
   await app.listen(PORT);
 }
